@@ -1,0 +1,22 @@
+fileFormatVersion: 2
+guid: 2980b465a3d48354280e373df064a0e3
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontNames:
+  - Arcades
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: 71c37f32029d7cf46a44a53aa12aa272, type: 3}
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
