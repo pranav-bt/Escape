@@ -38,6 +38,7 @@ public class PlayerLogic : MonoBehaviour
     private int TotalCollectiblesInLevel;
     private int CollectiblesCollected = 0;
     public GameObject WinLoseCanvas;
+    public TextMeshProUGUI CoinText;
     [HideInInspector] public bool ReadInput = true;
     [SerializeField] public AudioPlayer Audioplayer;
     [SerializeField] private AudioClip CharacterSwitchAudio;
@@ -51,7 +52,13 @@ public class PlayerLogic : MonoBehaviour
     {
         IPcontroller = FindObjectOfType<InputController>();
         TotalCollectiblesInLevel = GameObject.FindGameObjectsWithTag("Collectible").Length;
+        UpdateCoinText();
         ReadInput = true;
+    }
+
+    private void UpdateCoinText()
+    {
+        CoinText.text = $"{CollectiblesCollected} / {TotalCollectiblesInLevel}";
     }
 
     // Update is called once per frame
@@ -215,7 +222,8 @@ public class PlayerLogic : MonoBehaviour
             Destroy(other.gameObject);
             CollectiblesCollected++;
             Audioplayer.PlayOneShot(CollectibleAudio);
-            if(CollectiblesCollected >= TotalCollectiblesInLevel)
+            UpdateCoinText();
+            if (CollectiblesCollected >= TotalCollectiblesInLevel)
             {
                 WinConditionsMet = true;
             }
