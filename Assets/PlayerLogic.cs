@@ -21,6 +21,8 @@ public enum CurrentPlayer
 
 public class PlayerLogic : MonoBehaviour
 {
+    [SerializeField] private List<GameObject> HealthParts;
+    private Dictionary<GameObject, bool> HealthBar;
     public CurrentPlayer ActivePlayer = CurrentPlayer.Square1;
     public PlayerState CurrentPlayerState = PlayerState.Idle;
     private PlayerState PreviousPlayerState;
@@ -37,6 +39,8 @@ public class PlayerLogic : MonoBehaviour
     [HideInInspector] public bool WinConditionsMet = false;
     private int TotalCollectiblesInLevel;
     private int CollectiblesCollected = 0;
+    private int MaxHealthParts = 0;
+    private int CurrentHealthPart = 0;
     public GameObject WinLoseCanvas;
     public TextMeshProUGUI CoinText;
     [HideInInspector] public bool ReadInput = true;
@@ -48,12 +52,30 @@ public class PlayerLogic : MonoBehaviour
     [SerializeField] public AudioClip JumpPowerUpAudio;
     [SerializeField] public AudioClip TeleportAudio;
     // Start is called before the first frame update
+
+
+    private void OnEnable()
+    {
+        EventManager.DamageEvent += DamagePlayer;
+    }
+
+    private void OnDisable()
+    {
+        EventManager.DamageEvent -= DamagePlayer;
+    }
+
     void Start()
     {
         IPcontroller = FindObjectOfType<InputController>();
         TotalCollectiblesInLevel = GameObject.FindGameObjectsWithTag("Collectible").Length;
         UpdateCoinText();
         ReadInput = true;
+        HealthBar = new Dictionary<GameObject, bool>();
+        foreach(GameObject HealthPart in HealthParts)
+        {
+            MaxHealthParts++;
+            HealthBar.Add(HealthPart, true);
+        }
     }
 
     private void UpdateCoinText()
@@ -216,6 +238,7 @@ public class PlayerLogic : MonoBehaviour
         if(other.gameObject.tag == "PlayerSwitch")
         {
             CharacterSwitch();
+            return;
         }
         else if(other.gameObject.tag == "Collectible")
         {
@@ -227,6 +250,12 @@ public class PlayerLogic : MonoBehaviour
             {
                 WinConditionsMet = true;
             }
+            return;
+        }
+        else if (other.gameObject.tag == "Hazard")
+        {
+            EventManager.BroadCastDamageEvent();
+            return;
         }
         else if (other.gameObject.tag == "GameOver")
         {
@@ -234,7 +263,23 @@ public class PlayerLogic : MonoBehaviour
             WinLoseCanvas.SetActive(true);
             WinLoseCanvas.GetComponentInChildren<TextMeshProUGUI>().text = "Game Over";
             ReadInput = false;
+            return;
         }
+    }
+
+    private void DamagePlayer()
+    {
+        foreach (KeyValuePair<GameObject, bool> HealthPart in HealthBar)
+        {
+            if (CurrentHealthPart < MaxHealthParts && HealthPart.Key == HealthParts[CurrentHealthPart])
+            {
+                HealthBar[HealthPart.Key] = false;
+                HealthPart.Key.gameObject.GetComponent<SpriteRenderer>().color = new Color(0, 0, 0);
+                CurrentHealthPart++;
+                return;
+            }
+        }
+
     }
 
     private void CharacterSwitch()
@@ -243,11 +288,19 @@ public class PlayerLogic : MonoBehaviour
         {
             case CurrentPlayer.Square1:
                 ActivePlayer = CurrentPlayer.Square2;
-                GetComponent<SpriteRenderer>().color = new Color(0, 1, 0);
+                foreach(KeyValuePair<GameObject, bool> HealthPart in HealthBar)
+                {
+                    if (HealthPart.Value == true)
+                    { HealthPart.Key.gameObject.GetComponent<SpriteRenderer>().color = new Color(0, 1, 0); }
+                }
                 break;
             case CurrentPlayer.Square2:
                 ActivePlayer = CurrentPlayer.Square1;
-                GetComponent<SpriteRenderer>().color = new Color(1,1,1);
+                foreach (KeyValuePair<GameObject, bool> HealthPart in HealthBar)
+                {
+                    if (HealthPart.Value == true)
+                    { HealthPart.Key.gameObject.GetComponent<SpriteRenderer>().color = new Color(1, 0, 0); }
+                }
                 break;
         }
         Audioplayer.PlayOneShot(CharacterSwitchAudio);
