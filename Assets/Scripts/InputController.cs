@@ -14,6 +14,7 @@ public class InputController : MonoBehaviour
 {
     [HideInInspector] public InputKey CurrentInput;
     [HideInInspector] public PlayerLogic Player;
+    [SerializeField] public GameObject DiegeticCoinText;
     // Update is called once per frame
     private void Start()
     {
@@ -27,6 +28,14 @@ public class InputController : MonoBehaviour
             {
                 SceneManager.LoadScene(SceneManager.GetActiveScene().name);
             }
+            if (Input.GetKey(KeyCode.Escape))
+            {
+                SceneManager.LoadScene("LevelSelection");
+            }
+            if (Input.GetKey(KeyCode.Tab))
+            {
+                DiegeticCoinText.SetActive(true);
+            }    
             else if (Input.GetKey(KeyCode.LeftArrow))
             {
                 CurrentInput = InputKey.Left;

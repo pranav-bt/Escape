@@ -7,12 +7,28 @@ public class ButtonScript : MonoBehaviour
 {
     public void StartButton()
     {
-        SceneManager.LoadScene("SampleScene");
+        SceneManager.LoadScene("LevelSelection");
     }
 
     public void MainMenuButton()
     {
         SceneManager.LoadScene("StartScene");
+    }
+
+    public void Level1()
+    {
+        SceneManager.LoadScene("SampleScene");
+    }
+
+    public void Level2()
+    {
+        SceneManager.LoadScene("SampleScene 1");
+    }
+
+    public void RestartScene()
+    {
+        
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     public void QuitButton()

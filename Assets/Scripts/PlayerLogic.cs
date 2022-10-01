@@ -21,6 +21,7 @@ public enum CurrentPlayer
 
 public class PlayerLogic : MonoBehaviour
 {
+    [SerializeField] private float JumpPowerUpDuration = 5.0f;
     [SerializeField] private List<GameObject> HealthParts;
     private Dictionary<GameObject, bool> HealthBar;
     public CurrentPlayer ActivePlayer = CurrentPlayer.Square1;
@@ -34,7 +35,7 @@ public class PlayerLogic : MonoBehaviour
     public float PowerUpBoost = 1.0f;
     private float PowerUpCooldown = 0.0f;
     float JumpCooldown = 0.0f;
-    float JumpCoolDownDuration = 1.5f;
+    float JumpCoolDownDuration = 1.2f;
     bool bCanJump = true;
     [HideInInspector] public bool WinConditionsMet = false;
     private int TotalCollectiblesInLevel;
@@ -45,23 +46,28 @@ public class PlayerLogic : MonoBehaviour
     public TextMeshProUGUI CoinText;
     [HideInInspector] public bool ReadInput = true;
     [SerializeField] public AudioPlayer Audioplayer;
-    [SerializeField] private AudioClip CharacterSwitchAudio;
-    [SerializeField] private AudioClip CollectibleAudio;
-    [SerializeField] private AudioClip GameOverAudio;
-    [SerializeField] public AudioClip PlayerWinAudio;
     [SerializeField] public AudioClip JumpPowerUpAudio;
     [SerializeField] public AudioClip TeleportAudio;
+    private IEnumerator BlinkCoroutine;
     // Start is called before the first frame update
 
 
     private void OnEnable()
     {
         EventManager.DamageEvent += DamagePlayer;
+        EventManager.GameOver += GameOver;
+        EventManager.CharacterSwitch += CharacterSwitch;
+        EventManager.CoinCollected += UpdateCoinText;
+        EventManager.PlayerWin += PlayerWin;
     }
 
     private void OnDisable()
     {
         EventManager.DamageEvent -= DamagePlayer;
+        EventManager.GameOver -= GameOver;
+        EventManager.CharacterSwitch -= CharacterSwitch;
+        EventManager.CoinCollected -= UpdateCoinText;
+        EventManager.PlayerWin -= PlayerWin;
     }
 
     void Start()
@@ -76,14 +82,17 @@ public class PlayerLogic : MonoBehaviour
             MaxHealthParts++;
             HealthBar.Add(HealthPart, true);
         }
+
     }
 
     private void UpdateCoinText()
     {
         CoinText.text = $"{CollectiblesCollected} / {TotalCollectiblesInLevel}";
+        IPcontroller.DiegeticCoinText.gameObject.SetActive(true);
     }
 
     // Update is called once per frame
+    bool Once = false;
     void Update()
     {
         CurrentInput = IPcontroller.CurrentInput;
@@ -94,26 +103,46 @@ public class PlayerLogic : MonoBehaviour
         }
 
         UpdateState();
-
+        
         if(PowerUpBoost>1.0f)
         {
+            if(!Once)
+            {
+                BlinkCoroutine = BlinkGameObject(gameObject, 30, JumpPowerUpDuration);
+                StartCoroutine(BlinkCoroutine);
+                Once = true;
+            }
             PowerUpCooldown += Time.deltaTime;
-            if (PowerUpCooldown > 5.0f)
+            if (PowerUpCooldown > JumpPowerUpDuration)
             {
                 PowerUpBoost = 1.0f;
                 PowerUpCooldown = 0.0f;
+                StopCoroutine(BlinkCoroutine);
+                gameObject.GetComponentInChildren<SpriteRenderer>().enabled = true;
+                Once = false;
+            }
+            if (!bCanJump)
+            {
+                JumpCooldown += Time.deltaTime;
+                if (JumpCooldown > 1.5f)
+                {
+                    bCanJump = true;
+                    NextPlayerState = PlayerState.Idle;
+                }
             }
         }
 
-        if(!bCanJump)
+        if(PowerUpBoost <= 1.0f && !bCanJump)
         {
             JumpCooldown += Time.deltaTime;
             if(JumpCooldown > JumpCoolDownDuration)
             {
                 bCanJump = true;
+                NextPlayerState = PlayerState.Idle;
             }
         }
 
+        
     }
 
     private void ChangeState()
@@ -235,21 +264,16 @@ public class PlayerLogic : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D other)
     {
-        if(other.gameObject.tag == "PlayerSwitch")
-        {
-            CharacterSwitch();
-            return;
-        }
-        else if(other.gameObject.tag == "Collectible")
+        if(other.gameObject.tag == "Collectible")
         {
             Destroy(other.gameObject);
             CollectiblesCollected++;
-            Audioplayer.PlayOneShot(CollectibleAudio);
-            UpdateCoinText();
+            //Audioplayer.PlayOneShot(CollectibleAudio);
             if (CollectiblesCollected >= TotalCollectiblesInLevel)
             {
                 WinConditionsMet = true;
             }
+            EventManager.BroadCastCoinCollectedEvent();
             return;
         }
         else if (other.gameObject.tag == "Hazard")
@@ -259,16 +283,35 @@ public class PlayerLogic : MonoBehaviour
         }
         else if (other.gameObject.tag == "GameOver")
         {
-            Audioplayer.PlayOneShot(GameOverAudio);
-            WinLoseCanvas.SetActive(true);
-            WinLoseCanvas.GetComponentInChildren<TextMeshProUGUI>().text = "Game Over";
-            ReadInput = false;
+            // broadcast event
+            EventManager.BroadCastGameOverEvent();
+            return;
+        }
+    }
+
+    private void GameOver()
+    {
+        //Audioplayer.PlayOneShot(GameOverAudio);
+        WinLoseCanvas.SetActive(true);
+        WinLoseCanvas.GetComponentInChildren<TextMeshProUGUI>().text = "Game Over";
+        ReadInput = false;
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.gameObject.tag == "PlayerSwitch")
+        {
+            EventManager.BroadCastCharacterSwitchEvent();
             return;
         }
     }
 
     private void DamagePlayer()
     {
+        if(CurrentHealthPart >= MaxHealthParts)
+        {
+            EventManager.BroadCastGameOverEvent();
+        }
         foreach (KeyValuePair<GameObject, bool> HealthPart in HealthBar)
         {
             if (CurrentHealthPart < MaxHealthParts && HealthPart.Key == HealthParts[CurrentHealthPart])
@@ -279,7 +322,6 @@ public class PlayerLogic : MonoBehaviour
                 return;
             }
         }
-
     }
 
     private void CharacterSwitch()
@@ -303,6 +345,28 @@ public class PlayerLogic : MonoBehaviour
                 }
                 break;
         }
-        Audioplayer.PlayOneShot(CharacterSwitchAudio);
+        if (BlinkCoroutine != null)
+        { StopCoroutine(BlinkCoroutine); gameObject.GetComponentInChildren<SpriteRenderer>().enabled = true; }
+    }
+
+
+    public IEnumerator BlinkGameObject(GameObject gameObject, int numBlinks, float seconds)
+    {
+        int j = 0; int i = 0;
+        SpriteRenderer renderer = gameObject.GetComponentInChildren<SpriteRenderer>();
+        for (i = 0; i < numBlinks * 2; i++)
+        {
+            renderer.enabled = !renderer.enabled;
+            yield return new WaitForSeconds(0.2f);
+        }
+    }
+
+
+    private void PlayerWin()
+    {
+        WinLoseCanvas.GetComponentInChildren<TextMeshProUGUI>().text = "Level Completed!";
+        WinLoseCanvas.SetActive(true);
+        //Audioplayer.PlayOneShot(PlayerWinAudio);
+        ReadInput = false;
     }
 }

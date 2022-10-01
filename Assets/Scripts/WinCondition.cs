@@ -24,10 +24,7 @@ public class WinCondition : MonoBehaviour
             PlayerLogic PL = collision.gameObject.GetComponent<PlayerLogic>();
             if (PL.WinConditionsMet)
             {
-                PL.WinLoseCanvas.GetComponentInChildren<TextMeshProUGUI>().text = "Level Completed!";
-                PL.WinLoseCanvas.SetActive(true);
-                PL.Audioplayer.PlayOneShot(PL.PlayerWinAudio);
-                PL.ReadInput = false;
+                EventManager.BroadCastPlayerWinEvent();
             }
         }
     }
