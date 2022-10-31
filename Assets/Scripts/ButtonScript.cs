@@ -25,6 +25,11 @@ public class ButtonScript : MonoBehaviour
         SceneManager.LoadScene("SampleScene 1");
     }
 
+    public void MetoidVaniaLevel1()
+    {
+        SceneManager.LoadScene("SampleScene 2");
+    }
+
     public void RestartScene()
     {
         

@@ -8,7 +8,8 @@ public enum InputKey
     Right,
     Up,
     Down,
-    Jump
+    Jump,
+    Attack
 }
 public class InputController : MonoBehaviour
 {
@@ -39,11 +40,13 @@ public class InputController : MonoBehaviour
             else if (Input.GetKey(KeyCode.LeftArrow))
             {
                 CurrentInput = InputKey.Left;
+                
                 Player.NextPlayerState = PlayerState.PlayerMovement;
             }
             else if (Input.GetKey(KeyCode.RightArrow))
             {
                 CurrentInput = InputKey.Right;
+                
                 Player.NextPlayerState = PlayerState.PlayerMovement;
             }
             else if (Input.GetKey(KeyCode.UpArrow))

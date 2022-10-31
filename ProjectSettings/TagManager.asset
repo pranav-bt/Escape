@@ -8,6 +8,9 @@ TagManager:
   - Collectible
   - GameOver
   - Hazard
+  - Enemy
+  - WoodBlock
+  - Wood
   layers:
   - Default
   - TransparentFX
