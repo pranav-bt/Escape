@@ -11,6 +11,7 @@ public class GiveAbility : MonoBehaviour
         if(other.gameObject.tag == "Player")
         {
             other.GetComponent<Knight>().UnlockAbility(UnlockIndex);
+            FindObjectOfType<AudioPlayer>().PlayOneShot(other.GetComponent<Knight>().SFX_Ability); 
             Destroy(gameObject);
         }
     }

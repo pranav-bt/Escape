@@ -9,6 +9,7 @@ public class Lever : MonoBehaviour
         if (other.gameObject.tag == "Player")
         {
             GetComponentInParent<LeverDoor>().PlayerInRange = true;
+            GetComponentInParent<LeverDoor>().Player = other.gameObject.GetComponent<Knight>();
         }
     }
 }

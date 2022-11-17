@@ -14,6 +14,7 @@ public class DashState : State
     {
         Player.KnightAnimator.SetBool("Dash", true);
         Player.IsDashing = true;
+        GameObject.FindObjectOfType<AudioPlayer>().PlayOneShot(Player.SFX_Dash);
     }
 
     // Update is called once per frame

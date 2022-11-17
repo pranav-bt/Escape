@@ -12,7 +12,8 @@ public class LevelEnd : MonoBehaviour
         {
             Text.text = "LEVEL COMPLETE \n Press R to Restart or Esc to Quit";
             EventManager.BroadCastPlayerWinEvent();
-            collision.gameObject.GetComponent<Knight>().LevelComplete = true; 
+            collision.gameObject.GetComponent<Knight>().LevelComplete = true;
+            collision.gameObject.GetComponent<StateManager>().IdleReturn();
             collision.gameObject.GetComponent<Knight>().CanMove = false; 
         }
     }

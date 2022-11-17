@@ -16,6 +16,9 @@ public class Knight : MonoBehaviour
     public GameObject VFX_Dash;
     public AudioClip SFX_Strike;
     public AudioClip SFX_Damage;
+    public AudioClip SFX_Dash;
+    public AudioClip SFX_Ability;
+    public AudioClip SFX_Switch;
 
     //Jump
     public float PowerUpBoost = 1.0f;
