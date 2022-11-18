@@ -12,6 +12,7 @@ public class StateManager : MonoBehaviour
     public State JumpState;
     public State DashState;
     public State StrikeState;
+    public State CastState;
 
     State CurrentState;
     void Start()
@@ -24,6 +25,7 @@ public class StateManager : MonoBehaviour
         JumpState = new JumpState(player);
         DashState = new DashState(player, false);
         StrikeState = new StrikeState(player, false);
+        CastState = new CastState(player);
         CurrentState = IdleState;
     }
 

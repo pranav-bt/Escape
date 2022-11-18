@@ -11,6 +11,7 @@ public class EventManager : MonoBehaviour
     public static event InGameEvent CharacterSwitch;
     public static event InGameEvent PlayerWin;
     public static event InGameEvent Teleport;
+    public static event InGameEvent MapView;
 
 
     public static void BroadCastDamageEvent()
@@ -50,6 +51,14 @@ public class EventManager : MonoBehaviour
         if (PlayerWin != null)
         {
             PlayerWin();
+        }
+    }
+
+    public static void BroadCastMapViewEvent()
+    {
+        if(MapView != null)
+        {
+            MapView();
         }
     }
 }

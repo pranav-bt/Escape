@@ -23,7 +23,7 @@ public class InputController : MonoBehaviour
     }
     void Update()
     {
-        if (Player.ReadInput)
+        /*if (Player.ReadInput)
         {
             if (Input.GetKey(KeyCode.R))
             {
@@ -69,6 +69,6 @@ public class InputController : MonoBehaviour
                 if (Player.CurrentPlayerState != PlayerState.Jump)
                     Player.NextPlayerState = PlayerState.Idle;
             }
-        }
+        }*/
     }
 }

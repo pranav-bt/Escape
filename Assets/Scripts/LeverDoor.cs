@@ -20,7 +20,7 @@ public class LeverDoor : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(PlayerInRange && Input.GetKey(KeyCode.E) && Lever.GetComponent<SpriteRenderer>().sprite != LeverOpenSprite)
+        if(PlayerInRange && Input.GetKey(KeyCode.F) && Lever.GetComponent<SpriteRenderer>().sprite != LeverOpenSprite)
         {
             Lever.GetComponent<SpriteRenderer>().sprite = LeverOpenSprite; 
             Door.gameObject.transform.localScale = new Vector2(1, 1);

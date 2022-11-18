@@ -14,12 +14,15 @@ public class WalkState : State
     // Update is called once per frame
     public override void Update()
     {
-        float horval = Input.GetAxis("Horizontal");       
-        Vector2 val = new Vector2(horval * 3.0f, Player.KnightRigidBody.velocity.y);
-        Player.KnightRigidBody.velocity = val;
-        spriteflip(horval);
-        bool playermotion = Mathf.Abs(horval) > 0;
-        Player.KnightAnimator.SetBool("Running", playermotion);
+        if (Player.CanMove)
+        {
+            float horval = Input.GetAxis("Horizontal");
+            Vector2 val = new Vector2(horval * 3.0f, Player.KnightRigidBody.velocity.y);
+            Player.KnightRigidBody.velocity = val;
+            spriteflip(horval);
+            bool playermotion = Mathf.Abs(horval) > 0;
+            Player.KnightAnimator.SetBool("Running", playermotion);
+        }
     }
 
     public override void EndState() 
@@ -33,10 +36,12 @@ public class WalkState : State
         if (horval > 0)
         {
             sp.localScale = new Vector2(0.7f, 0.7f);
+            Player.FacingRight = true;
         }
         if (horval < 0)
         {
             sp.localScale = new Vector2(-0.7f, 0.7f);
+            Player.FacingRight = false;
         }
     }
 }

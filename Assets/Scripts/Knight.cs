@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
 public class Knight : MonoBehaviour
 {
@@ -14,6 +15,7 @@ public class Knight : MonoBehaviour
 
     //Effects
     public GameObject VFX_Dash;
+    public GameObject Projectile;
     public AudioClip SFX_Strike;
     public AudioClip SFX_Damage;
     public AudioClip SFX_Dash;
@@ -22,7 +24,8 @@ public class Knight : MonoBehaviour
 
     //Jump
     public float PowerUpBoost = 1.0f;
-    public float JumpCooldown = 1.2f;
+    public float JumpCooldown = 1.0f;
+    public bool bJumpAvailable = false;
 
     //Attack and Abilities
     public bool IsAttacking = false;
@@ -35,6 +38,13 @@ public class Knight : MonoBehaviour
     public int CoinsInLevel = 0;
     public bool CanMove = true;
     public bool LevelComplete = false;
+    public bool FacingRight = true;
+    public float DamageTimer = 1.0f;
+    public float CastCooldown = 5.0f;
+    public float CastTimer = 0.0f;
+    public bool StartCastTimer = false;
+    public GameObject ProjectileSpawnLocation;
+    public GameObject ProjectileCooldownUI;
 
     //UI references
     public TextMeshProUGUI CoinText;
@@ -56,7 +66,7 @@ public class Knight : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        JumpState JS = stateManager.JumpState as JumpState;
+/*        JumpState JS = stateManager.JumpState as JumpState;
         if (JS != null && !JS.bCanJump)
         {
             JumpCooldown -= Time.deltaTime;
@@ -66,9 +76,19 @@ public class Knight : MonoBehaviour
                 JumpCooldown = 1.6f;
                 stateManager.ChangeState(stateManager.IdleState);
             }
+        }*/
+        if (StartCastTimer)
+        {
+            CastTimer += Time.deltaTime;
+            if(CastTimer > CastCooldown)
+            {
+                stateManager.CastState.StateUnlocked = true;
+                ProjectileCooldownUI.GetComponent<Image>().color = new Color(255, 255, 255);
+                StartCastTimer = false;
+                CastTimer = 0.0f;
+            }
         }
-
-        RaycastHit2D Hit = Physics2D.Raycast(transform.position, Vector2.right , 15f);
+        RaycastHit2D Hit = Physics2D.Raycast(transform.position, Vector2.right , 5f);
         //Debug.DrawRay(transform.position, Vector2.right*12f, Color.green);
         if (Hit && Hit.collider.gameObject.tag == "Enemy")
         {
@@ -78,12 +98,14 @@ public class Knight : MonoBehaviour
 
     private void OnTriggerStay2D(Collider2D other)
     {
-        if (IsAttacking && other.gameObject.tag == "Enemy")
+        DamageTimer -= Time.deltaTime;
+        if (IsAttacking && other.gameObject.tag == "Enemy" && DamageTimer <= 0.0f)
         {
             if (other.gameObject.GetComponent<Zombie>().Health > 0)
             {
                 FindObjectOfType<AudioPlayer>().PlayOneShot(SFX_Damage);
                 other.GetComponent<Zombie>().TakeDamage();
+                DamageTimer = 1.0f;
             }
         }
         if (IsStriking && other.gameObject.tag == "WoodBlock")
@@ -98,6 +120,10 @@ public class Knight : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D other)
     {
+        if(other.gameObject.layer == LayerMask.NameToLayer("Ground"))
+        {
+            bJumpAvailable = true;
+        }
         if (other.gameObject.tag == "Collectible")
         {
             CoinsCollected++;
@@ -116,7 +142,7 @@ public class Knight : MonoBehaviour
     {
         if (Health > 0.0f)
         { 
-        Health -= 2.0f; 
+        Health -= 0.5f; 
         EventManager.BroadCastDamageEvent();
         }
         if (Health <= 0.0f && CanMove)
@@ -125,6 +151,20 @@ public class Knight : MonoBehaviour
             EventManager.BroadCastDamageEvent();
         }
         UpdateUI();
+    }
+
+    public void CastSpell()
+    {
+        Vector3 Location = new Vector3(transform.position.x, transform.position.y, -8);
+        GameObject Proj = Instantiate(Projectile, Location, transform.rotation);
+        if(FacingRight)
+        {
+            Proj.GetComponent<Projectile>().Direction = 1.0f;
+        }
+        else 
+        {
+            Proj.GetComponent<Projectile>().Direction = -1.0f;
+        }
     }
 
     public void UnlockAbility(int Index)
@@ -161,4 +201,5 @@ public class Knight : MonoBehaviour
             gameObject.transform.position = new Vector2(Point2.gameObject.transform.position.x, Point2.gameObject.transform.position.y);
         }
     }
+ 
 }

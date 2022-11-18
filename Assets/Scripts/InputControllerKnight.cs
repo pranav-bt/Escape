@@ -11,7 +11,8 @@ public enum KnightInputKey
     Jump,
     Attack,
     Dash,
-    Strike
+    Strike,
+    Cast
 }
 public class InputControllerKnight : MonoBehaviour
 {
@@ -40,11 +41,11 @@ public class InputControllerKnight : MonoBehaviour
                 KnightStateManager.ChangeState(KnightStateManager.WalkState);
                 
             }
-            else if (Input.GetKey(KeyCode.Space))
+            /*else if (Input.GetKey(KeyCode.Space))
             {
                 CurrentInput = KnightInputKey.Jump;
                 KnightStateManager.ChangeState(KnightStateManager.JumpState);
-            }
+            }*/
             else if (Input.GetKey(KeyCode.LeftAlt))
             {
                 CurrentInput = KnightInputKey.Dash;
@@ -68,6 +69,11 @@ public class InputControllerKnight : MonoBehaviour
             {
                 FindObjectOfType<Knight>().ActivateTeleportCheat(2);
             }
+            else if (Input.GetKeyDown(KeyCode.E))
+            {
+                CurrentInput = KnightInputKey.Cast;
+                KnightStateManager.ChangeState(KnightStateManager.CastState);
+            }
         }
         if (Input.GetKey(KeyCode.R) && Player.LevelComplete)
         {
@@ -76,6 +82,15 @@ public class InputControllerKnight : MonoBehaviour
         if (Input.GetKey(KeyCode.Escape) && Player.LevelComplete)
         {
             Application.Quit();
+        }
+        if (Input.GetKeyDown(KeyCode.M) && !Player.LevelComplete)
+        {
+            EventManager.BroadCastMapViewEvent();
+        }
+        if (Input.GetKey(KeyCode.Space))
+        {
+            CurrentInput = KnightInputKey.Jump;
+            KnightStateManager.ChangeState(KnightStateManager.JumpState);
         }
     }
 }

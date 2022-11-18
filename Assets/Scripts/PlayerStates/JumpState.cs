@@ -10,11 +10,12 @@ public class JumpState : State
     
     public override void BeginState()
     {
-        if (bCanJump)
+        if (/*bCanJump &&*/ Player.bJumpAvailable)
         {
             bCanJump = false;
             Player.JumpCooldown = 1.6f;
-            Player.GetComponent<Rigidbody2D>().AddForce(Vector2.up * 3.0f * Player.PowerUpBoost, ForceMode2D.Impulse); 
+            Player.GetComponent<Rigidbody2D>().AddForce(Vector2.up * 3.0f * Player.PowerUpBoost, ForceMode2D.Impulse);
+            Player.bJumpAvailable = false;
         }
     }
 

@@ -8,6 +8,7 @@ public class IdleState : State
     public IdleState(Knight player) { Player = player; }
     public override void BeginState()
     {
+        Player.KnightRigidBody.velocity = new Vector2(0, Player.KnightRigidBody.velocity.y);
         Player.KnightAnimator.SetBool("Running", false);
     }
 
